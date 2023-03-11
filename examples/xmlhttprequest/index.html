@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8"/>
+  <title>Groceries</title>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.7.10/dist/vue.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<h1>Groceries</h1>
+
+<div id="app">
+  <div v-if="loading" class="spinner-border" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  
+  <p v-if="errorMessage != ''">
+  {{ errorMessage }}
+  </p>
+
+  <table v-if="groceries.length > 0" class="table">
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total</th>
+      </tr>
+      <tr v-for="g in groceries">
+        <td>{{ g.name }}</td>
+        <td>${{ g.price }}</td>
+        <td>{{ g.quantity }}</td>
+        <td>${{ (g.price * g.quantity).toFixed(2) }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script type="text/javascript">
+
+var app = new Vue({
+  el: '#app',
+  data: { 
+    loading: true,
+    errorMessage: "",
+    groceries: []
+  },
+  methods: {
+    setGroceryList: function(list) {
+      this.groceries = list;
+    }
+  }
+});
+
+function loadGroceryList() {
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+    if (req.readyState !== XMLHttpRequest.DONE) return;
+    if(req.status === 200) {
+      console.log(req.response);
+      app.setGroceryList(JSON.parse(req.response));
+    } else {
+      app.errorMessage = "An error occured while loading the grocery list.";
+      console.log(req.status);
+    }
+    app.loading = false;
+  };
+  req.open('GET', 'groceries.json');
+  req.send();
+}
+
+loadGroceryList();
+
+</script>
+
+</body>
+
+</html>
